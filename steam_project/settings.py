@@ -15,7 +15,7 @@ from pathlib import Path
 
 load_dotenv()
 
-STEAM_API_KEY = os.getenv("STEAM_API_KEY")
+STEAM_API_KEY = "96EB08917E9C7FF108E8B68B8E6E526A"
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
