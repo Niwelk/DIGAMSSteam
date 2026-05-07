@@ -22,8 +22,17 @@ class Achievement(models.Model):
     rarity_percent = models.FloatField(default=0.0)
     difficulty_score = models.FloatField(default=0.0)
 
+    def calculate_difficulty(self):
+        # логика - чем меньше процент игроков (конкретно rarity_percent), тем выше сложность (0-10)
+        # если ачивку получили 0.1% игроков — это 10/10 сложность
+        # если 100% — то это 0/10
+        if self.rarity_percent == 0:
+            return 10.0
+        score = 10 - (self.rarity_percent / 10)
+        return round(max(0, min(10, score)), 2)
+
     def __str__(self):
-        return f"{self.display_name} - {self.game.name}"
+        return f"{self.game.name} | {self.display_name} ({self.difficulty_score})"
 
 class PriceHistory(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
