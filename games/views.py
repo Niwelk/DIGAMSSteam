@@ -1,248 +1,105 @@
 import requests
-from django.http import JsonResponse
 from django.conf import settings
-from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login
-from .models import Game, PriceHistory, Achievement, SearchHistory
-from django.views.decorators.csrf import csrf_exempt
-import json
-
-API_KEY = settings.STEAM_API_KEY
+from django.shortcuts import render
 
 
-@csrf_exempt
-def register(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST required"}, status=400)
-    try:
-        data = json.loads(request.body)
-        username = data.get("username")
-        password = data.get("password")
-        if not username or not password:
-            return JsonResponse({"error": "Missing fields"}, status=400)
-        if User.objects.filter(username=username).exists():
-            return JsonResponse({"error": "User exists"}, status=400)
-        user = User.objects.create_user(username=username, password=password)
-        return JsonResponse({"message": "User created"})
-    except Exception:
-        return JsonResponse({"error": "Internal server error"}, status=500)
+def index(request):
+    query = request.GET.get('query', '')
+    games = []
+    if query:
+        search_url = f"https://store.steampowered.com/api/storesearch/?term={query}&l=russian&cc=RU"
+        try:
+            response = requests.get(search_url).json()
+            if response and response.get('items'):
+                games = response['items']
+        except Exception as e:
+            print(f"Ошибка поиска: {e}")
+    return render(request, 'games/index.html', {'games': games, 'query': query})
 
 
-@csrf_exempt
-def login_view(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST required"}, status=400)
-    try:
-        data = json.loads(request.body)
-        username = data.get("username")
-        password = data.get("password")
-        user = authenticate(request, username=username, password=password)
-        if user is None:
-            return JsonResponse({"error": "Invalid credentials"}, status=400)
-        login(request, user)
-        return JsonResponse({"message": "Logged in"})
-    except Exception:
-        return JsonResponse({"error": "Internal server error"}, status=500)
-
-
-@csrf_exempt
-def get_search_history(request):
-    if not request.user.is_authenticated:
-        return JsonResponse({"error": "Unauthorized"}, status=401)
-    history = SearchHistory.objects.filter(user=request.user).order_by('-date')
-    result = []
-    for h in history:
-        result.append({
-            "query": h.query,
-            "date": h.date.strftime("%Y-%m-%d %H:%M")
-        })
-    return JsonResponse({"history": result})
-
-
-@csrf_exempt
-def test_api(request):
-    return JsonResponse({"message": "Backend works!"})
-
-
-@csrf_exempt
-def search_games(request):
-    query = request.GET.get('query')
-    if request.user.is_authenticated:
-        SearchHistory.objects.create(user=request.user, query=query)
-    if not query:
-        return JsonResponse({"error": "No query provided"}, status=400)
-    url = "https://store.steampowered.com/api/storesearch/"
-    params = {"term": query, "l": "english", "cc": "US"}
-    try:
-        response = requests.get(url, params=params, timeout=5)
-        if response.status_code != 200:
-            return JsonResponse({"error": "Steam API error"}, status=500)
-        data = response.json()
-        games = []
-        for item in data.get("items", []):
-            steam_id = item.get("id")
-            game, _ = Game.objects.update_or_create(
-                steam_id=steam_id,
-                defaults={
-                    "name": item.get("name"),
-                    "price": item.get("price", {}).get("final", 0) / 100,
-                    "image": item.get("tiny_image")
-                }
-            )
-            games.append({
-                "id": game.steam_id,
-                "name": game.name,
-                "price": game.price,
-                "image": game.image
-            })
-        return JsonResponse({"games": games})
-    except Exception:
-        return JsonResponse({"error": "Internal server error"}, status=500)
-
-
-@csrf_exempt
 def game_detail(request, game_id):
     url = "https://store.steampowered.com/api/appdetails/"
-    params = {"appids": game_id, "l": "english", "cc": "US"}
+    params = {"appids": game_id, "l": "russian"}
+    game_data = {}
     try:
-        response = requests.get(url, params=params, timeout=5)
-        if response.status_code != 200:
-            return JsonResponse({"error": "Steam API error"}, status=500)
-        data = response.json()
-        game_data = data.get(str(game_id), {}).get("data", {})
-        if not game_data:
-            return JsonResponse({"error": "Game not found"}, status=404)
-        price_info = game_data.get("price_overview")
-        current_price = price_info.get("final", 0) / 100 if price_info else 0
-        game, _ = Game.objects.update_or_create(
-            steam_id=game_id,
-            defaults={
-                "name": game_data.get("name"),
-                "price": current_price,
-                "image": game_data.get("header_image")
+        response = requests.get(url, params=params).json()
+        if response.get(str(game_id), {}).get("success"):
+            raw_data = response[str(game_id)]["data"]
+            game_data = {
+                "steam_id": game_id,
+                "name": raw_data.get("name"),
+                "description": raw_data.get("short_description"),
+                "image": raw_data.get("header_image"),
+                "price": raw_data.get("price_overview", {}).get("final_formatted", "Бесплатно")
             }
-        )
-        result = {
-            "id": game.steam_id,
-            "name": game.name,
-            "description": game_data.get("short_description"),
-            "image": game.image,
-            "price": game.price
-        }
-        return JsonResponse(result)
-    except Exception:
-        return JsonResponse({"error": "Internal server error"}, status=500)
-
-
-@csrf_exempt
-def get_achievements(request, game_id):
-    try:
-        #получаем проценты редкости
-        percent_url = "https://api.steampowered.com/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/"
-        percent_res = requests.get(percent_url, params={"gameid": game_id}, timeout=5)
-        if percent_res.status_code != 200:
-            return JsonResponse({"error": "Steam API error (percentages)"}, status=500)
-
-        percent_data = percent_res.json()
-        percent_list = percent_data.get("achievementpercentages", {}).get("achievements", [])
-        percent_dict = {ach["name"]: float(ach["percent"]) for ach in percent_list}
-
-        #получаем схему ачивок (названия и иконки)
-        schema_url = "https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/"
-        schema_res = requests.get(schema_url, params={"appid": game_id, "key": API_KEY}, timeout=5)
-        if schema_res.status_code != 200:
-            return JsonResponse({"error": "Steam API error (schema)"}, status=500)
-
-        schema_data = schema_res.json()
-        achievements_data = schema_data.get("game", {}).get("availableGameStats", {}).get("achievements", [])
-
-        #находим или создаем игру в БД
-        game_instance, _ = Game.objects.get_or_create(steam_id=game_id)
-
-        result = []
-        for ach in achievements_data:
-            api_name = ach.get("name")
-            rarity = percent_dict.get(api_name, 0.0)
-
-            #сохранение в DB и расчёт сложности
-            achievement_obj, created = Achievement.objects.update_or_create(
-                game=game_instance,
-                api_name=api_name,
-                defaults={
-                    'display_name': ach.get("displayName"),
-                    'description': ach.get("description", ""),
-                    'rarity_percent': rarity,
-                }
-            )
-            achievement_obj.difficulty_score = achievement_obj.calculate_difficulty()
-            achievement_obj.save()
-
-            result.append({
-                "name": achievement_obj.display_name,
-                "description": achievement_obj.description,
-                "icon": ach.get("icon"),
-                "rarity": achievement_obj.rarity_percent,
-                "difficulty_score": achievement_obj.difficulty_score,
-                "category": categorize_achievement(rarity)
-            })
-
-        return JsonResponse({"achievements": result})
     except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+        print(f"Ошибка деталей: {e}")
+    return render(request, 'games/game_detail.html', {'game': game_data})
 
 
-@csrf_exempt
-def categorize_achievement(percent):
-    if percent is None: return "unknown"
-    if percent > 50: return "easy"
-    if percent > 20: return "medium"
-    if percent > 5: return "rare"
-    return "epic"
+def get_achievements(request, game_id):
+    api_key = settings.STEAM_API_KEY
 
+    url_rarity = f"http://api.steampowered.com/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v0002/?gameid={game_id}"
+    url_schema = f"http://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?key={api_key}&appid={game_id}"
 
-@csrf_exempt
-def get_price(request, game_id):
-    url = "https://store.steampowered.com/api/appdetails/"
-    params = {"appids": game_id, "l": "english", "cc": "US"}
+    achievements = []
+    game_name = f"Игра {game_id}"
+
     try:
-        response = requests.get(url, params=params, timeout=5)
-        if response.status_code != 200:
-            return JsonResponse({"error": "Steam API error"}, status=500)
-        data = response.json()
-        game_data = data.get(str(game_id), {}).get("data", {})
-        if not game_data:
-            return JsonResponse({"error": "Game not found"}, status=404)
-        price_info = game_data.get("price_overview")
-        if price_info:
-            current_price = price_info.get("final", 0) / 100
-            initial_price = price_info.get("initial", 0) / 100
-            discount = price_info.get("discount_percent", 0)
-        else:
-            current_price = initial_price = discount = 0
+        res_rarity = requests.get(url_rarity).json()
+        res_schema = requests.get(url_schema).json()
 
-        game, _ = Game.objects.update_or_create(
-            steam_id=game_id,
-            defaults={
-                "name": game_data.get("name"),
-                "price": current_price,
-                "image": game_data.get("header_image")
-            }
-        )
-        last = PriceHistory.objects.filter(game=game).order_by('-date').first()
-        if not last or last.price != current_price:
-            PriceHistory.objects.create(game=game, price=current_price)
-        return JsonResponse(
-            {"current_price": current_price, "initial_price": initial_price, "discount_percent": discount})
-    except Exception:
-        return JsonResponse({"error": "Internal server error"}, status=500)
+        rarity_list = res_rarity.get('achievementpercentages', {}).get('achievements', [])
+
+        game_metadata = res_schema.get('game', {})
+        schema_list = game_metadata.get('availableGameStats', {}).get('achievements', [])
+        game_name = game_metadata.get('gameName', game_name)
+
+        schema_dict = {a['name']: a for a in schema_list}
+
+        for item in rarity_list:
+            api_name = item['name']
+            percent = float(item.get('percent', 0))
+
+            if api_name in schema_dict:
+                data = schema_dict[api_name]
+
+                difficulty = round(10 - (percent / 10), 2)
+                if difficulty < 0.1: difficulty = 0.1
+
+                achievements.append({
+                    'name': data.get('displayName', api_name),
+                    'description': data.get('description', 'Условие скрыто'),
+                    'icon': data.get('icon', ''),
+                    'rarity': round(percent, 1),
+                    'difficulty_score': difficulty
+                })
+
+        achievements.sort(key=lambda x: x['difficulty_score'], reverse=True)
+
+    except Exception as e:
+        print(f"Ошибка в цикле: {e}")
+
+    return render(request, 'games/achievements.html', {
+        'achievements': achievements,
+        'game': {'name': game_name, 'steam_id': game_id}
+    })
 
 
-@csrf_exempt
-def get_price_history(request, game_id):
-    try:
-        game = Game.objects.get(steam_id=game_id)
-        history = PriceHistory.objects.filter(game=game).order_by('date')
-        result = [{"price": h.price, "date": h.date.strftime("%Y-%m-%d %H:%M")} for h in history]
-        return JsonResponse({"history": result})
-    except Game.DoesNotExist:
-        return JsonResponse({"error": "Game not found"}, status=404)
+def test_api(request): return render(request, 'games/index.html')
+
+
+def get_search_history(request): return render(request, 'games/index.html')
+
+
+def get_price(request, game_id): return render(request, 'games/index.html')
+
+
+def get_price_history(request, game_id): return render(request, 'games/index.html')
+
+
+def register(request): return render(request, 'games/index.html')
+
+
+def login_view(request): return render(request, 'games/index.html')
