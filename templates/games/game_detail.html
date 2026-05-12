@@ -1,0 +1,16 @@
+{% extends "games/base.html" %}
+{% block content %}
+    <div style="display: flex; gap: 30px;">
+        <img src="{{ game.image }}" style="border-radius: 10px; width: 400px;">
+        <div>
+            <h1 style="color: #66c0f4;">{{ game.name }}</h1>
+            <p style="font-size: 1.2em;">{{ game.description|safe }}</p>
+            <h3 style="color: #a349a4;">Цена: {{ game.price }}</h3>
+
+
+            <a href="{% url 'achievements' game.steam_id %}" class="btn" style="background: #a349a4; padding: 15px 30px; font-size: 1.2em;">
+                ПОСМОТРЕТЬ ДОСТИЖЕНИЯ
+            </a>
+        </div>
+    </div>
+{% endblock %}

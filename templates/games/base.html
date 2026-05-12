@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Steam Achievement Intelligence</title>
+    <style>
+        /* Стили в духе Steam из твоей курсовой */
+        body {
+            background-color: #1b2838; /* Темно-синий фон Steam */
+            color: #c7d5e0;
+            font-family: "Motiva Sans", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #171a21;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid #66c0f4;
+        }
+        .container {
+            display: flex;
+            min-height: 90vh;
+        }
+        /* Боковая панель из твоего плана */
+        nav {
+            width: 250px;
+            background-color: #171a21;
+            padding: 20px;
+            border-right: 1px solid #2a475e;
+        }
+        main {
+            flex-grow: 1;
+            padding: 30px;
+        }
+        a { color: #66c0f4; text-decoration: none; }
+        .btn {
+            background: #2a475e;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+        .btn:hover { background: #66c0f4; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🏆 STEAM INTELLIGENCE</h1>
+    </header>
+    <div class="container">
+        <nav>
+            <h3>МЕНЮ</h3>
+            <ul>
+                <li><a href="{% url 'index' %}">Главная</a></li>
+                {% if game %}
+
+
+                <li><strong>{{ game.name }}</strong></li>
+                <li><a href="{% url 'game_detail' game.steam_id %}">О игре</a></li>
+                <li><a href="{% url 'achievements' game.steam_id %}">Достижения</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+        <main>
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>

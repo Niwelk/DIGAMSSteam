@@ -1,0 +1,23 @@
+{% extends "games/base.html" %}
+{% block content %}
+    <h2>Поиск игр</h2>
+    <form method="GET" action="{% url 'index' %}">
+        <input type="text" name="query" placeholder="Название игры..."
+               style="padding: 10px; width: 300px; background: #2a475e; color: white; border: none;">
+        <button type="submit" class="btn">Найти</button>
+    </form>
+
+    {% if games %}
+    <div style="margin-top: 30px;">
+        {% for game in games %}
+        <div style="background: #2a475e; padding: 15px; margin-bottom: 10px; border-radius: 5px; display: flex; align-items: center;">
+            <img src="{{ game.image }}" width="120" style="margin-right: 20px;">
+            <div>
+                <h3>{{ game.name }}</h3>
+                <a href="{% url 'game_detail' game.id %}" class="btn">Выбрать</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+{% endblock %}
