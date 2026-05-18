@@ -9,4 +9,7 @@ urlpatterns = [
 
     path('api/test/', views.test_api),
     path('api/history/', views.get_search_history, name='history'),
+
+    path('game/<int:game_id>/ai/', views.ai_analysis, name='ai_analysis'),
+
 ]

@@ -4,6 +4,7 @@ from pathlib import Path
 
 load_dotenv()
 
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 STEAM_API_KEY = "96EB08917E9C7FF108E8B68B8E6E526A"
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -75,5 +76,14 @@ USE_I18N = True
 
 USE_TZ = True
 
-STATIC_URL = 'static/'
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+STATIC_URL = 'static/'
+
+STATICFILES_DIRS = [
+    BASE_DIR / "static"
+]
+
+

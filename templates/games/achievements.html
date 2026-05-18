@@ -1,109 +1,157 @@
 {% extends "games/base.html" %}
 
 {% block content %}
-<style>
-    .ach-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 25px;
-        padding-bottom: 15px;
-        border-bottom: 2px solid #2a475e;
-    }
-    .filter-group {
-        display: flex;
-        gap: 12px;
-    }
-    .filter-btn {
-        background: #171a21;
-        border: 1px solid #66c0f4;
-        color: #66c0f4;
-        padding: 8px 18px;
-        border-radius: 4px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: 0.3s;
-    }
-    .filter-btn:hover {
-        background: #66c0f4;
-        color: #171a21;
-    }
-    .ach-card {
-        background: #1d2e3d;
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 15px;
-        display: flex;
-        align-items: center;
-        border: 1px solid #233c51;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-    }
-    .ach-icon {
-        width: 70px;
-        height: 70px;
-        border-radius: 4px;
-        margin-right: 25px;
-        border: 1px solid #66c0f4;
-    }
-    .ach-main { flex-grow: 1; }
-    .ach-title { color: #ffffff; font-size: 1.2em; font-weight: bold; margin: 0; }
-    .ach-desc { color: #acb2b8; font-size: 0.95em; margin: 8px 0; }
-    .how-to { color: #57cbde; font-size: 0.85em; font-style: italic; }
 
-    .ach-stats {
-        text-align: right;
-        min-width: 180px;
-    }
-    .diff-label { color: #a349a4; font-weight: bold; font-size: 0.9em; }
-    .progress-bg {
-        background: #171a21;
-        height: 10px;
-        border-radius: 5px;
-        margin: 8px 0;
-        width: 100%;
-    }
-    .progress-fill {
-        background: linear-gradient(90deg, #a349a4 0%, #d456d4 100%);
-        height: 100%;
-        border-radius: 5px;
-    }
-    .rarity-label { color: #8f98a0; font-size: 0.8em; }
-</style>
+<section class="fade-up">
 
-<div class="ach-header">
-    <div>
-        <h2 style="margin: 0; color: #66c0f4;">Достижения игры</h2>
-        <p style="margin: 5px 0 0 0; color: #8f98a0;">Интеллектуальный анализ сложности для {{ game.name }}</p>
-    </div>
-    <div class="filter-group">
-        <button class="filter-btn">РЕДКИЕ</button>
-        <button class="filter-btn">ПОПУЛЯРНЫЕ</button>
-        <button class="filter-btn">ВСЕ</button>
-    </div>
-</div>
+    <div style="margin-bottom: 30px;">
 
-<div class="achievement-list">
-    {% for ach in achievements %}
-    <div class="ach-card">
-        <img src="{{ ach.icon }}" class="ach-icon" alt="icon">
-        <div class="ach-main">
-            <p class="ach-title">{{ ach.name }}</p>
-            <p class="ach-desc">{{ ach.description }}</p>
-            <p class="how-to">🛠 Как получить: Выполните требования в процессе прохождения миссий.</p>
+        <h1 class="section-title">
+            {{ game.name }}
+        </h1>
+
+        <div class="section-subtitle">
+            Achievement Difficulty Analysis
         </div>
-        <div class="ach-stats">
-            <span class="diff-label">Сложность: {{ ach.difficulty_score }}/10</span>
-            <div class="progress-bg">
-                <div class="progress-fill" style="width: {{ ach.difficulty_score }}0%;"></div>
+
+    </div>
+
+    <!-- FILTERS -->
+
+    <div
+        class="glass"
+        style="
+            padding: 20px;
+            border-radius: 24px;
+            margin-bottom: 24px;
+        "
+    >
+
+        <div
+            style="
+                display: flex;
+                gap: 12px;
+                flex-wrap: wrap;
+                margin-bottom: 16px;
+            "
+        >
+
+            <a
+                href="?filter=all&sort={{ current_sort }}"
+                class="card-btn"
+            >
+                All
+            </a>
+
+            <a
+                href="?filter=rare&sort={{ current_sort }}"
+                class="card-btn"
+            >
+                Rare
+            </a>
+
+            <a
+                href="?filter=popular&sort={{ current_sort }}"
+                class="card-btn"
+            >
+                Popular
+            </a>
+
+        </div>
+
+        <div
+            style="
+                display: flex;
+                gap: 12px;
+                flex-wrap: wrap;
+            "
+        >
+
+            <a
+                href="?filter={{ current_filter }}&sort=difficulty"
+                class="card-btn"
+            >
+                Difficulty
+            </a>
+
+            <a
+                href="?filter={{ current_filter }}&sort=rarity"
+                class="card-btn"
+            >
+                Rarity
+            </a>
+
+            <a
+                href="?filter={{ current_filter }}&sort=name"
+                class="card-btn"
+            >
+                Name
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- ACHIEVEMENTS -->
+
+    <div class="achievements-list">
+
+        {% for ach in achievements %}
+
+        <div class="achievement-card glass">
+
+            <img
+                src="{{ ach.icon }}"
+                alt=""
+                class="achievement-icon"
+            >
+
+            <div class="achievement-content">
+
+                <div class="achievement-title">
+                    {{ ach.name }}
+                </div>
+
+                <div class="achievement-desc">
+                    {{ ach.description }}
+                </div>
+
+                <div class="difficulty-bar">
+
+                    <div
+                        class="difficulty-fill"
+                        style="
+                            width:
+                            {{ ach.difficulty_score|floatformat:0 }}0%;
+                        "
+                    ></div>
+
+                </div>
+
             </div>
-            <span class="rarity-label">Редкость в Steam: {{ ach.rarity }}%</span>
+
+            <div class="achievement-stats">
+
+                <div class="difficulty-badge">
+
+                    {{ ach.difficulty_score }}/10
+
+                </div>
+
+                <div class="rarity">
+
+                    {{ ach.rarity }}% players
+
+                </div>
+
+            </div>
+
         </div>
+
+        {% endfor %}
+
     </div>
-    {% empty %}
-    <div class="ach-card">
-        <p>Достижения не найдены. Убедитесь, что игра поддерживает систему достижений Steam.</p>
-    </div>
-    {% endfor %}
-</div>
+
+</section>
 
 {% endblock %}
