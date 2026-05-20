@@ -1,41 +1,18 @@
 {% extends "games/base.html" %}
 {% block content %}
-    <div style="display: flex; gap: 30px;">
-        <img src="{{ game.image }}" style="border-radius: 10px; width: 400px;">
-        <div>
-            <h1 style="color: #66c0f4;">{{ game.name }}</h1>
-            <p style="font-size: 1.2em;">{{ game.description|safe }}</p>
-            <h3 style="color: #a349a4;">Цена: {{ game.price }}</h3>
-
-
-            <a href="{% url 'achievements' game.steam_id %}" class="btn" style="background: #a349a4; padding: 15px 30px; font-size: 1.2em;">
-                ПОСМОТРЕТЬ ДОСТИЖЕНИЯ
-            </a>
+<section class="glass fade-up" style="display: flex; gap: 40px;">
+    <img src="{{ game.image }}" style="border-radius: 20px; width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
+    <div style="flex-grow: 1;">
+        <h1 style="font-size: 2.5rem; margin-top: 0; background: linear-gradient(90deg, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{{ game.name }}</h1>
+        <div style="color: #94a3b8; line-height: 1.6; margin-bottom: 24px; font-size: 1.05rem;">
+            {{ game.description|safe|default:"Описание отсутствует." }}
         </div>
-<<<<<<< Updated upstream
-    </div>
-=======
+        <div style="font-size: 1.3rem; font-weight: 700; color: #f472b6; margin-bottom: 30px;">Цена: {{ game.price }}</div>
 
-        <div class="game-description">
-
-            {{ game.description|default:"Описание отсутствует." }}
-
+        <div style="display: flex; gap: 16px;">
+            <a href="{% url 'achievements' game.steam_id %}" class="btn">🏆 Достижения</a>
+            <a href="{% url 'ai_analysis' game.steam_id %}" class="btn" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">🧠 AI-Анализ</a>
         </div>
-
-        <a
-            href="{% url 'achievements' game.steam_id %}"
-            class="btn"
-        >
-            Посмотреть достижения
-        </a>
-
-        <a href="{% url 'ai_analysis' game.steam_id %}" class="btn btn-large">
-            🧠 AI-анализ
-        </a>
-
     </div>
-
 </section>
-
->>>>>>> Stashed changes
 {% endblock %}

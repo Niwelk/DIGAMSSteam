@@ -1,71 +1,27 @@
 {% extends "games/base.html" %}
 {% block content %}
-<<<<<<< Updated upstream
-    <h2>Поиск игр</h2>
-    <form method="GET" action="{% url 'index' %}">
-        <input type="text" name="query" placeholder="Название игры..."
-               style="padding: 10px; width: 300px; background: #2a475e; color: white; border: none;">
-        <button type="submit" class="btn">Найти</button>
-=======
+<section class="glass fade-up" style="text-align: center; padding: 40px;">
+    <h1 style="font-size: 2.5rem; margin-top: 0; font-weight: 800;">Анализируй <span style="background: linear-gradient(90deg, #f472b6, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Steam Достижения</span></h1>
+    <p style="color: #94a3b8; max-width: 600px; margin: 0 auto 30px;">Найдите любую игру Steam и изучайте редкость достижений, сложность получения и глобальную статистику игроков.</p>
 
-<section class="search-hero glass fade-up">
-
-    <h1 class="hero-title">
-        Анализируй
-        <span class="hero-gradient">
-            Steam Достижения
-        </span>
-        Как Никогда Раньше
-    </h1>
-
-    <p class="hero-subtitle">
-        Найдите любую игру Steam и изучайте редкость достижений,
-        сложность получения и глобальную статистику игроков.
-    </p>
-
-    <form
-        method="GET"
-        action="{% url 'index' %}"
-        class="search-form"
-    >
-
-        <input
-            type="text"
-            name="query"
-            value="{{ query }}"
-            class="search-input"
-            placeholder="Поиск игры..."
-        >
-
-        <button class="btn">
-            Поиск
-        </button>
-
->>>>>>> Stashed changes
+    <form method="GET" action="{% url 'index' %}" style="display: flex; gap: 12px; max-width: 600px; margin: 0 auto;">
+        <input type="text" name="query" value="{{ query }}" placeholder="Поиск игры (например, Witcher, Phasmophobia)..."
+               style="flex-grow: 1; padding: 16px; background: #0f172a; color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; font-size: 1rem;">
+        <button type="submit" class="btn">Поиск</button>
     </form>
+</section>
 
-    {% if games %}
-    <div style="margin-top: 30px;">
-        {% for game in games %}
-        <div style="background: #2a475e; padding: 15px; margin-bottom: 10px; border-radius: 5px; display: flex; align-items: center;">
-            <img src="{{ game.image }}" width="120" style="margin-right: 20px;">
-            <div>
-                <h3>{{ game.name }}</h3>
-                <a href="{% url 'game_detail' game.id %}" class="btn">Выбрать</a>
-            </div>
-<<<<<<< Updated upstream
-=======
-
-            <a
-                href="{% url 'game_detail' game.id %}"
-                class="card-btn"
-            >
-                Открыть →
-            </a>
-
->>>>>>> Stashed changes
+{% if games %}
+<div class="fade-up" style="margin-top: 30px;">
+    {% for game in games %}
+    <div class="glass" style="margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; padding: 16px;">
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <img src="{{ game.image }}" width="120" style="border-radius: 12px;">
+            <h3 style="margin: 0; font-weight: 600;">{{ game.name }}</h3>
         </div>
-        {% endfor %}
+        <a href="{% url 'game_detail' game.id %}" class="btn" style="padding: 10px 20px;">Открыть →</a>
     </div>
-    {% endif %}
+    {% endfor %}
+</div>
+{% endif %}
 {% endblock %}
