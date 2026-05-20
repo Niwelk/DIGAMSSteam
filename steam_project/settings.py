@@ -6,6 +6,8 @@ load_dotenv()
 
 STEAM_API_KEY = "96EB08917E9C7FF108E8B68B8E6E526A"
 
+GIGACHAT_CREDENTIALS = "MDE5ZTQ3NTgtMGNhYS03NDJiLWJlMWMtYjFkOTA1YjZmN2UwOmJmZDhiOGY5LTNmMDUtNGY1Ni04OTU2LWQ3Mzc0MTc2ZTNhYg=="
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-w#yam^j)*^bv+cr59sd8-zn-@*_*0dav4)bt8i8^*j9(-@1ii@'
