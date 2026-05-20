@@ -50,6 +50,7 @@
     .ach-desc { color: #acb2b8; font-size: 0.95em; margin: 8px 0; }
     .how-to { color: #57cbde; font-size: 0.85em; font-style: italic; }
 
+<<<<<<< Updated upstream
     .ach-stats {
         text-align: right;
         min-width: 180px;
@@ -69,19 +70,110 @@
     }
     .rarity-label { color: #8f98a0; font-size: 0.8em; }
 </style>
+=======
+<section class="fade-up">
+
+    <div style="margin-bottom: 30px;">
+
+        <h1 class="section-title">
+            {{ game.name }}
+        </h1>
+
+        <div class="section-subtitle">
+            Анализ сложности достижений
+        </div>
+>>>>>>> Stashed changes
 
 <div class="ach-header">
     <div>
         <h2 style="margin: 0; color: #66c0f4;">Достижения игры</h2>
         <p style="margin: 5px 0 0 0; color: #8f98a0;">Интеллектуальный анализ сложности для {{ game.name }}</p>
     </div>
+<<<<<<< Updated upstream
     <div class="filter-group">
         <button class="filter-btn">РЕДКИЕ</button>
         <button class="filter-btn">ПОПУЛЯРНЫЕ</button>
         <button class="filter-btn">ВСЕ</button>
+=======
+
+    <!-- FILTERS -->
+    <div
+        class="glass"
+        style="
+            padding: 20px;
+            border-radius: 24px;
+            margin-bottom: 24px;
+        "
+    >
+
+        <div
+            style="
+                display: flex;
+                gap: 12px;
+                flex-wrap: wrap;
+                margin-bottom: 16px;
+            "
+        >
+
+            <a
+                href="?filter=all&sort={{ current_sort }}"
+                class="card-btn"
+            >
+                All
+            </a>
+
+            <a
+                href="?filter=rare&sort={{ current_sort }}"
+                class="card-btn"
+            >
+                Rare
+            </a>
+
+            <a
+                href="?filter=popular&sort={{ current_sort }}"
+                class="card-btn"
+            >
+                Popular
+            </a>
+
+        </div>
+
+        <div
+            style="
+                display: flex;
+                gap: 12px;
+                flex-wrap: wrap;
+            "
+        >
+
+            <a
+                href="?filter={{ current_filter }}&sort=difficulty"
+                class="card-btn"
+            >
+                Difficulty
+            </a>
+
+            <a
+                href="?filter={{ current_filter }}&sort=rarity"
+                class="card-btn"
+            >
+                Rarity
+            </a>
+
+            <a
+                href="?filter={{ current_filter }}&sort=name"
+                class="card-btn"
+            >
+                Name
+            </a>
+
+        </div>
+
+>>>>>>> Stashed changes
     </div>
 </div>
 
+<<<<<<< Updated upstream
 <div class="achievement-list">
     {% for ach in achievements %}
     <div class="ach-card">
@@ -97,6 +189,59 @@
                 <div class="progress-fill" style="width: {{ ach.difficulty_score }}0%;"></div>
             </div>
             <span class="rarity-label">Редкость в Steam: {{ ach.rarity }}%</span>
+=======
+    <!-- ACHIEVEMENTS -->
+    <div class="achievements-list">
+
+        {% for ach in achievements %}
+
+        <div class="achievement-card glass">
+
+            <img
+                src="{{ ach.icon }}"
+                alt=""
+                class="achievement-icon"
+            >
+
+            <div class="achievement-content">
+
+                <!-- achievement title in English -->
+                <div class="achievement-title">
+                    {{ ach.name }}
+                </div>
+
+                <!-- achievement description -->
+                <div class="achievement-desc">
+                    {{ ach.description }}
+                </div>
+
+                <div class="difficulty-bar">
+
+                    <div
+                        class="difficulty-fill"
+                        style="
+                            width:
+                            {{ ach.difficulty_score|floatformat:0 }}0%;
+                        "
+                    ></div>
+
+                </div>
+
+            </div>
+
+            <div class="achievement-stats">
+
+                <div class="difficulty-badge">
+                    {{ ach.difficulty_score }}/10
+                </div>
+
+                <div class="rarity">
+                    {{ ach.rarity }}% игроков
+                </div>
+
+            </div>
+
+>>>>>>> Stashed changes
         </div>
     </div>
     {% empty %}

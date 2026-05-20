@@ -12,5 +12,30 @@
                 ПОСМОТРЕТЬ ДОСТИЖЕНИЯ
             </a>
         </div>
+<<<<<<< Updated upstream
     </div>
+=======
+
+        <div class="game-description">
+
+            {{ game.description|default:"Описание отсутствует." }}
+
+        </div>
+
+        <a
+            href="{% url 'achievements' game.steam_id %}"
+            class="btn"
+        >
+            Посмотреть достижения
+        </a>
+
+        <a href="{% url 'ai_analysis' game.steam_id %}" class="btn btn-large">
+            🧠 AI-анализ
+        </a>
+
+    </div>
+
+</section>
+
+>>>>>>> Stashed changes
 {% endblock %}
